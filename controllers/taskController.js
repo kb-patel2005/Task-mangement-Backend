@@ -23,18 +23,30 @@ export const createTask = async (req, res) => {
 
 export const getTasksByUserId = async (req, res) => {
     try {
-        const pageNum = parseInt(req.query.page) || 1;
-        const limitNum = parseInt(req.query.limit) || 10;
+        const pageNum = parseInt(req.query.page, 10) || 1;
+        const limitNum = Math.min(parseInt(req.query.limit, 10) || 10, 100); // cap at 100
 
-        const tasks = await Task.find({ userId: req.user.id })
-            .skip((pageNum - 1) * limitNum)
-            .limit(limitNum);
+        const filter = { userId: req.user.id };
 
-        const totalTasks = await Task.countDocuments({ userId: req.user.id });
+        // optional search by title
+        if (req.query.search) {
+            const q = req.query.search.trim();
+            if (q.length) {
+                filter.title = { $regex: q, $options: "i" }; // case-insensitive
+            }
+        }
+
+        const [totalTasks, tasks] = await Promise.all([
+            Task.countDocuments(filter),
+            Task.find(filter)
+                .sort({ createdAt: -1 }) // newest first
+                .skip((pageNum - 1) * limitNum)
+                .limit(limitNum)
+        ]);
 
         res.json({
             totalTasks,
-            totalPages: Math.ceil(totalTasks / limitNum),
+            totalPages: Math.ceil(totalTasks / limitNum) || 1,
             currentPage: pageNum,
             tasks,
         });
@@ -42,6 +54,7 @@ export const getTasksByUserId = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 
 export const updateTask = async (req, res) => {
