@@ -21,15 +21,20 @@ export const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await User.create({
+        const user = await User.create({
             name,
             email,
             password: hashedPassword
         });
 
-        res.status(201).json({
-            message: "User Registered"
-        });
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        res.json({ token, user });
+
 
     } catch (error) {
 
@@ -54,8 +59,7 @@ export const login = async (req, res) => {
             });
         }
 
-        const isMatch =
-            await bcrypt.compare( password, user.password );
+        const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
 
@@ -65,12 +69,12 @@ export const login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            {id: user._id},
+            { id: user._id },
             process.env.JWT_SECRET,
-            {expiresIn: "1d"}
+            { expiresIn: "1d" }
         );
 
-        res.json({token, user });
+        res.json({ token, user });
 
     } catch (error) {
 
