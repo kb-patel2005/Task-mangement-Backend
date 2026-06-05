@@ -4,7 +4,7 @@ const router = express.Router();
 
 import authMiddleware from "../middleware/authMiddleware.js";
 
-import { createTask, getTasks, updateTask, deleteTask , getTasksByUserId } from "../controllers/taskController.js";
+import { createTask, updateTask, deleteTask , getTasksByUserId } from "../controllers/taskController.js";
 
 router.post("/", authMiddleware, createTask);
 
