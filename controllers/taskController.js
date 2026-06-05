@@ -24,12 +24,37 @@ export const createTask = async (req, res) => {
 export const getTasks = async (req, res) => {
 
     try {
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = Math.min(parseInt(req.query.limit, 10) || 10, 100);
+        const skip = (page - 1) * limit;
 
-        const tasks = await Task.find({
-            userId: req.user.id
+        const filter = { userId: req.user.id };
+
+        // optional title search (case-insensitive, partial match)
+        if (req.query.search) {
+            const q = req.query.search.trim();
+            if (q.length) {
+                filter.title = { $regex: q, $options: "i" };
+            }
+        }
+
+        const [total, tasks] = await Promise.all([
+            Task.countDocuments(filter),
+            Task.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+        ]);
+
+        const totalPages = Math.ceil(total / limit) || 1;
+
+        res.json({
+            page,
+            limit,
+            total,
+            totalPages,
+            data: tasks
         });
-
-        res.json(tasks);
 
     } catch (error) {
 
