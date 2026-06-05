@@ -21,48 +21,28 @@ export const createTask = async (req, res) => {
     }
 };
 
-export const getTasks = async (req, res) => {
-
+export const getTasksByUserId = async (req, res) => {
     try {
-        const page = parseInt(req.query.page, 10) || 1;
-        const limit = Math.min(parseInt(req.query.limit, 10) || 10, 100);
-        const skip = (page - 1) * limit;
+        const pageNum = parseInt(req.query.page) || 1;
+        const limitNum = parseInt(req.query.limit) || 10;
 
-        const filter = { userId: req.user.id };
+        const tasks = await Task.find({ userId: req.user.id })
+            .skip((pageNum - 1) * limitNum)
+            .limit(limitNum);
 
-        // optional title search (case-insensitive, partial match)
-        if (req.query.search) {
-            const q = req.query.search.trim();
-            if (q.length) {
-                filter.title = { $regex: q, $options: "i" };
-            }
-        }
-
-        const [total, tasks] = await Promise.all([
-            Task.countDocuments(filter),
-            Task.find(filter)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-        ]);
-
-        const totalPages = Math.ceil(total / limit) || 1;
+        const totalTasks = await Task.countDocuments({ userId: req.user.id });
 
         res.json({
-            page,
-            limit,
-            total,
-            totalPages,
-            data: tasks
+            totalTasks,
+            totalPages: Math.ceil(totalTasks / limitNum),
+            currentPage: pageNum,
+            tasks,
         });
-
     } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
+        res.status(500).json({ message: error.message });
     }
 };
+
 
 export const updateTask = async (req, res) => {
 
@@ -101,10 +81,10 @@ export const deleteTask = async (req, res) => {
 
         await Task.findByIdAndDelete(req.params.id);
 
-        res.json({message: "Task deleted"});
+        res.json({ message: "Task deleted" });
 
     } catch (error) {
 
-        res.status(500).json({ message: error.message});
+        res.status(500).json({ message: error.message });
     }
 };

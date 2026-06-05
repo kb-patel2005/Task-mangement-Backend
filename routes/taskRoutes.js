@@ -4,11 +4,11 @@ const router = express.Router();
 
 import authMiddleware from "../middleware/authMiddleware.js";
 
-import { createTask, getTasks, updateTask, deleteTask } from "../controllers/taskController.js";
+import { createTask, getTasks, updateTask, deleteTask , getTasksByUserId } from "../controllers/taskController.js";
 
 router.post("/", authMiddleware, createTask);
 
-router.get("/", authMiddleware, getTasks);
+router.get("/tasks", authMiddleware, getTasksByUserId);
 
 router.put("/:id", authMiddleware, updateTask);
 
