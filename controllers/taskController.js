@@ -68,8 +68,7 @@ export const updateTask = async (req, res) => {
 
     try {
 
-        const task =
-            await Task.findById(req.params.id);
+        const task = await Task.findById(req.params.id);
 
         if (!task) {
 
@@ -78,15 +77,11 @@ export const updateTask = async (req, res) => {
             });
         }
 
-        task.title =
-            req.body.title || task.title;
+        task.title = req.body.title || task.title;
 
-        task.description =
-            req.body.description ||
-            task.description;
+        task.description = req.body.description || task.description;
 
-        task.status =
-            req.body.status || task.status;
+        task.status = req.body.status || task.status;
 
         await task.save();
 
@@ -104,18 +99,12 @@ export const deleteTask = async (req, res) => {
 
     try {
 
-        await Task.findByIdAndDelete(
-            req.params.id
-        );
+        await Task.findByIdAndDelete(req.params.id);
 
-        res.json({
-            message: "Task deleted"
-        });
+        res.json({message: "Task deleted"});
 
     } catch (error) {
 
-        res.status(500).json({
-            message: error.message
-        });
+        res.status(500).json({ message: error.message});
     }
 };

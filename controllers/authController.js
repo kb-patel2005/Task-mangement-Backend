@@ -8,14 +8,9 @@ export const register = async (req, res) => {
 
     try {
 
-        const {
-            name,
-            email,
-            password
-        } = req.body;
+        const { name, email, password } = req.body;
 
-        const existingUser =
-            await User.findOne({ email });
+        const existingUser = await User.findOne({ email });
 
         if (existingUser) {
 
@@ -24,8 +19,7 @@ export const register = async (req, res) => {
             });
         }
 
-        const hashedPassword =
-            await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         await User.create({
             name,
@@ -49,13 +43,9 @@ export const login = async (req, res) => {
 
     try {
 
-        const {
-            email,
-            password
-        } = req.body;
+        const { email, password } = req.body;
 
-        const user =
-            await User.findOne({ email });
+        const user = await User.findOne({ email });
 
         if (!user) {
 
@@ -65,10 +55,7 @@ export const login = async (req, res) => {
         }
 
         const isMatch =
-            await bcrypt.compare(
-                password,
-                user.password
-            );
+            await bcrypt.compare( password, user.password );
 
         if (!isMatch) {
 
@@ -78,19 +65,12 @@ export const login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            {
-                id: user._id
-            },
+            {id: user._id},
             process.env.JWT_SECRET,
-            {
-                expiresIn: "1d"
-            }
+            {expiresIn: "1d"}
         );
 
-        res.json({
-            token,
-            user
-        });
+        res.json({token, user });
 
     } catch (error) {
 
