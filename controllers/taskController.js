@@ -24,22 +24,21 @@ export const createTask = async (req, res) => {
 export const getTasksByUserId = async (req, res) => {
     try {
         const pageNum = parseInt(req.query.page, 10) || 1;
-        const limitNum = Math.min(parseInt(req.query.limit, 10) || 10, 100); // cap at 100
+        const limitNum = Math.min(parseInt(req.query.limit, 10) || 10, 100);
 
         const filter = { userId: req.user.id };
 
-        // optional search by title
         if (req.query.search) {
             const q = req.query.search.trim();
             if (q.length) {
-                filter.title = { $regex: q, $options: "i" }; // case-insensitive
+                filter.title = { $regex: q, $options: "i" };
             }
         }
 
         const [totalTasks, tasks] = await Promise.all([
             Task.countDocuments(filter),
             Task.find(filter)
-                .sort({ createdAt: -1 }) // newest first
+                .sort({ createdAt: -1 })
                 .skip((pageNum - 1) * limitNum)
                 .limit(limitNum)
         ]);
