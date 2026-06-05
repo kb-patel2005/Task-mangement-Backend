@@ -8,7 +8,7 @@ import { createTask, updateTask, deleteTask , getTasksByUserId } from "../contro
 
 router.post("/", authMiddleware, createTask);
 
-router.get("/tasks", authMiddleware, getTasksByUserId);
+router.get("/", authMiddleware, getTasksByUserId);
 
 router.put("/:id", authMiddleware, updateTask);
 
